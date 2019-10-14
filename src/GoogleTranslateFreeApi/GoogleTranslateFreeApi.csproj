@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<Authors>Ilya Meyta</Authors>
+		<Company />
+		<Description>API for free text translation using Google translate</Description>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageProjectUrl>https://github.com/Grizley56/GoogleTranslateFreeApi</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/Grizley56/GoogleTranslateFreeApi</RepositoryUrl>
+		<PackageTags>Translate GoogleTranslate Free Translator</PackageTags>
+		<NeutralLanguage>en</NeutralLanguage>
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+		<Version>1.1.1</Version>
+		<AssemblyVersion>1.1.1.0</AssemblyVersion>
+		<FileVersion>1.1.1.0</FileVersion>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <DocumentationFile>GoogleTranslateFreeApi.xml</DocumentationFile>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <DocumentationFile>GoogleTranslateFreeApi\bin\Release\GoogleTranslateFreeApi.xml</DocumentationFile>
+	</PropertyGroup>
+	<ItemGroup>
+	  <Compile Remove="GoogleTranslateFreeApi\**" />
+	  <EmbeddedResource Remove="GoogleTranslateFreeApi\**" />
+	  <None Remove="GoogleTranslateFreeApi\**" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Remove="Languages.json" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Include="..\LICENSE">
+	    <Pack>True</Pack>
+	    <PackagePath></PackagePath>
+	  </None>
+	</ItemGroup>
+	<ItemGroup>
+	  <PackageReference Include="System.Text.Json" Version="4.6.0" />
+	</ItemGroup>
+	<ItemGroup>
+	  <EmbeddedResource Include="Languages.json">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	</ItemGroup>
+
+
+</Project>
