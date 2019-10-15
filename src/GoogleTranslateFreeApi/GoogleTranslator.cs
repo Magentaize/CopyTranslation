@@ -99,7 +99,7 @@ namespace GoogleTranslateFreeApi
 			using (StreamReader reader = new StreamReader(stream))
 			{
 				string languages = reader.ReadToEnd();
-                LanguagesSupported = System.Text.Json.JsonSerializer.Deserialize<Language[]>(languages);
+                LanguagesSupported = JsonSerializer.Deserialize<Language[]>(languages);
 			}
 		}
 
@@ -109,7 +109,8 @@ namespace GoogleTranslateFreeApi
 			Address = new Uri($"https://{domain}/translate_a/single");
 			_generator = new GoogleKeyTokenGenerator();
 			_httpClient = new HttpClient();
-		}
+            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(@"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36");
+        }
 
 		/// <summary>
 		/// <p>
@@ -202,17 +203,11 @@ namespace GoogleTranslateFreeApi
 
 			string postData = $"sl={fromLanguage.ISO639}&" +
 												$"tl={toLanguage.ISO639}&" +
-												$"hl=en&" +
 												$"q={Uri.EscapeDataString(originalText)}&" +
-												$"tk={token}&" +
-												"client=t&" +
-												"dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&" +
+												"client=gtx&" +
+                                                "dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&" +
 												"ie=UTF-8&" +
-												"oe=UTF-8&" +
-												"otf=1&" +
-												"ssel=0&" +
-												"tsel=0&" +
-												"kc=7";
+												"oe=UTF-8&";
 
 			string result;
 
@@ -242,7 +237,7 @@ namespace GoogleTranslateFreeApi
 			TranslationResult translationResult = new TranslationResult();
 
 			//var tmp = JsonConvert.DeserializeObject<JToken>(result);
-            var tmp = System.Text.Json.JsonSerializer.Deserialize<JsonElement>(result);
+            var tmp = JsonSerializer.Deserialize<JsonElement>(result);
 
             string originalTextTranscription = null, translatedTextTranscription = null;
 
