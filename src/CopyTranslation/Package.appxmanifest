@@ -8,14 +8,14 @@
 
   <Identity
     Name="e7166968-3afb-4a69-bc05-04d48d749684"
-    Publisher="CN=Magenta"
+    Publisher="CN=Magentaize"
     Version="1.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="e7166968-3afb-4a69-bc05-04d48d749684" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>CopyTranslation</DisplayName>
-    <PublisherDisplayName>Magenta</PublisherDisplayName>
+    <PublisherDisplayName>Magentaize</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 

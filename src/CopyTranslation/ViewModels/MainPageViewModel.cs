@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using Windows.ApplicationModel.DataTransfer;
-using Windows.UI.Popups;
+using Windows.Foundation.Collections;
 
 namespace CopyTranslation.ViewModels
 {
@@ -26,20 +26,26 @@ namespace CopyTranslation.ViewModels
 
             Observable.FromEventPattern<object>(h => Clipboard.ContentChanged += h, h => Clipboard.ContentChanged -= h)
                 .SubscribeOnDispatcher()
-                .Throttle(TimeSpan.FromMilliseconds(200))
-                .ObserveOnDispatcher()
-                .Select(_ => Clipboard.GetContent())
-                .Where(x => x.Contains(StandardDataFormats.Text))
-                .SelectMany(x => Observable.FromAsync(() => x.GetTextAsync().AsTask()))
-                .DistinctUntilChanged()
+                .Throttle(TimeSpan.FromMilliseconds(50))
                 .ObserveOn(TaskPoolScheduler.Default)
+                .SelectMany(_ => Observable.FromAsync(async () =>
+                {
+                    var req = new ValueSet();
+                    req.Add("Op", "Clipboard");
+                    return await App.Connection.SendMessageAsync(req);
+                }))
+                .Select(x => x.Message["Res"] as string)
+                .Select(x => x.Trim())
+                .Where(x => x != string.Empty)
+                .DistinctUntilChanged()
                 .Select(x => x.Replace("\r\n", " "))
-                .SelectMany(x => Observable.FromAsync(() => translator.TranslateLiteAsync(x, en, zh)))
+                .SelectMany(x => Observable.FromAsync(async () => await translator.TranslateLiteAsync(x, en, zh)))
                 .Select(x => x.MergedTranslation)
                 .ObserveOnDispatcher()
+                .Retry()
                 .ToPropertyEx(this, x => x.Translated)
                 .ThrownExceptions
-                .Subscribe(e => { Debugger.Break(); })
+                .Subscribe(e => { Debug.WriteLine($"Exception: {e.Message}"); })
                 ;
         }
     }

@@ -4,8 +4,9 @@ using System.Diagnostics;
 using System.Text;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
+using Windows.ApplicationModel.AppService;
+using Windows.ApplicationModel.Background;
 using Windows.Foundation;
-using Windows.UI.Popups;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -15,6 +16,12 @@ namespace CopyTranslation
 {
     sealed partial class App : Application
     {
+        public static BackgroundTaskDeferral AppServiceDeferral = null;
+        public static AppServiceConnection Connection = null;
+        public static event EventHandler AppServiceDisconnected;
+        public static event EventHandler<AppServiceTriggerDetails> AppServiceConnected;
+        public static bool IsForeground = false;
+
         public App()
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -27,6 +34,33 @@ namespace CopyTranslation
         private async void App_UnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e)
         {
             Debugger.Break();
+        }
+
+        protected override void OnBackgroundActivated(BackgroundActivatedEventArgs args)
+        {
+            base.OnBackgroundActivated(args);
+
+            if (args.TaskInstance.TriggerDetails is AppServiceTriggerDetails details)
+            {
+                // only accept connections from callers in the same package
+                if (details.CallerPackageFamilyName == Package.Current.Id.FamilyName)
+                {
+                    // connection established from the fulltrust process
+                    AppServiceDeferral = args.TaskInstance.GetDeferral();
+                    args.TaskInstance.Canceled += OnTaskCanceled;
+
+                    Connection = details.AppServiceConnection;
+                    AppServiceConnected?.Invoke(this, args.TaskInstance.TriggerDetails as AppServiceTriggerDetails);
+                }
+            }
+        }
+
+        private void OnTaskCanceled(IBackgroundTaskInstance sender, BackgroundTaskCancellationReason reason)
+        {
+            AppServiceDeferral?.Complete();
+            AppServiceDeferral = null;
+            Connection = null;
+            AppServiceDisconnected?.Invoke(this, null);
         }
 
         protected override async void OnLaunched(LaunchActivatedEventArgs e)

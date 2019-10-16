@@ -156,7 +156,7 @@
       <Version>6.2.9</Version>
     </PackageReference>
     <PackageReference Include="ReactiveUI.Fody">
-      <Version>10.5.1</Version>
+      <Version>10.5.7</Version>
     </PackageReference>
     <PackageReference Include="System.Text.Encoding.CodePages">
       <Version>4.6.0</Version>
@@ -167,6 +167,11 @@
       <Project>{cc08b551-2563-4676-b666-0493ea28b958}</Project>
       <Name>GoogleTranslateFreeApi</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <SDKReference Include="WindowsDesktop, Version=10.0.18362.0">
+      <Name>Windows Desktop Extensions for the UWP</Name>
+    </SDKReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
