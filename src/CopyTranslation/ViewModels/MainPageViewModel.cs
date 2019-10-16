@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation.Collections;
@@ -58,19 +59,31 @@ namespace CopyTranslation.ViewModels
                         .Do(_ => lastError = false)
                 )
                 .Do(_ => status.OnNext(MainPageStatus.Busy))
-                .SelectMany(_ => Observable.FromAsync(async () =>
+                .SelectMany(_ => 
+                    Observable.FromAsync(async () =>
+                    {
+                        var req = new ValueSet();
+                        req.Add("Op", "Clipboard");
+                        var res = await App.Connection?.SendMessageAsync(req);
+                        return (res.Message["Res"] as string).Trim();
+                    })
+                    .Catch(Observable.Return(string.Empty))
+                )
+                .Where(x =>
                 {
-                    var req = new ValueSet();
-                    req.Add("Op", "Clipboard");
-                    return await App.Connection.SendMessageAsync(req);
-                }))
-                .Select(x => x.Message["Res"] as string)
-                .Select(x => x.Trim())
-                .Where(x => x != string.Empty)
-                .Where(x => char.IsLetter(x[0]))
-                .DistinctUntilChanged()
+                    if (x != string.Empty && char.IsLetter(x[0]))
+                        return true;
+                    else
+                    {
+                        status.OnNext(MainPageStatus.Normal);
+                        return false;
+                    }
+                })
+                //.DistinctUntilChanged()
+                .DistinctUntilChanged(_ => status.OnNext(MainPageStatus.Normal))
                 .Select(x => x.Replace("\r\n", " "))
-                .SelectMany(x => Observable.FromAsync(async () => await translator.TranslateLiteAsync(x, en, zh)))
+                .Select(x => Observable.FromAsync(async () => await translator.TranslateLiteAsync(x, en, zh)))
+                .Switch()
                 .Select(x => x.MergedTranslation)
                 .Do(_ => status.OnNext(MainPageStatus.Normal))
                 ;
