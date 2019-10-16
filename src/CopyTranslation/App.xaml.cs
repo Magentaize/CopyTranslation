@@ -7,6 +7,7 @@ using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.AppService;
 using Windows.ApplicationModel.Background;
 using Windows.Foundation;
+using Windows.UI.Core.Preview;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -65,7 +66,7 @@ namespace CopyTranslation
 
         protected override async void OnLaunched(LaunchActivatedEventArgs e)
         {
-            Frame rootFrame = Window.Current.Content as Frame;
+            var rootFrame = Window.Current.Content as Frame;
 
             if (rootFrame == null)
             {
@@ -83,6 +84,7 @@ namespace CopyTranslation
                 Window.Current.Content = rootFrame;
 
                 ApplicationView.GetForCurrentView().SetPreferredMinSize(new Size(100, 100));
+                SystemNavigationManagerPreview.GetForCurrentView().CloseRequested += App_CloseRequested;  
             }
 
             if (e.PrelaunchActivated == false)
@@ -99,6 +101,12 @@ namespace CopyTranslation
             }
         }
 
+        private void App_CloseRequested(object sender, SystemNavigationCloseRequestedPreviewEventArgs e)
+        {
+            AppServiceDeferral?.Complete();
+            AppServiceDeferral = null;
+        }
+
         void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
         {
             throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
@@ -107,7 +115,6 @@ namespace CopyTranslation
         private void OnSuspending(object sender, SuspendingEventArgs e)
         {
             var deferral = e.SuspendingOperation.GetDeferral();
-            //TODO: Save application state and stop any background activity
             deferral.Complete();
         }
     }

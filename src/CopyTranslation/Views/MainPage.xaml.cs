@@ -25,9 +25,14 @@ namespace CopyTranslation.Views
             if (ApiInformation.IsApiContractPresent("Windows.ApplicationModel.FullTrustAppContract", 1, 0))
             {
                 //App.AppServiceConnected += MainPage_AppServiceConnected;
-                //App.AppServiceDisconnected += MainPage_AppServiceDisconnected;
+                App.AppServiceDisconnected += App_AppServiceDisconnected;
                 await FullTrustProcessLauncher.LaunchFullTrustProcessForCurrentAppAsync();
             }
+        }
+
+        private void App_AppServiceDisconnected(object sender, EventArgs e)
+        {
+
         }
 
         //private async void MainPage_AppServiceConnected(object sender, AppServiceTriggerDetails e)

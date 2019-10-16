@@ -12,13 +12,13 @@ namespace CopyTranslation.Native
     internal sealed class AppService
     {
         private AppServiceConnection connection = null;
-        private ManualResetEvent mre;
+        private AutoResetEvent are;
 
         public async Task RunAsync()
         {
             await InitializeAppServiceConnectionAsync();
-            mre = new ManualResetEvent(false);
-            mre.WaitOne();
+            are = new AutoResetEvent(false);
+            await Task.Run(() => are.WaitOne());
         }
 
         private string GetClipboard()
@@ -49,8 +49,7 @@ namespace CopyTranslation.Native
 
         private void Connection_ServiceClosed(AppServiceConnection sender, AppServiceClosedEventArgs args)
         {
-            Debugger.Launch();
-            mre.Set();
+            are.Set();
         }
 
         private async Task InitializeAppServiceConnectionAsync()
