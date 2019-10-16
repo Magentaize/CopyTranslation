@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.AppService;
 using Windows.Foundation.Collections;
@@ -23,7 +22,14 @@ namespace CopyTranslation.Native
 
         private string GetClipboard()
         {
-            return Clipboard.ContainsText() ? Clipboard.GetText() : string.Empty;
+            try
+            {
+                return TextCopy.Clipboard.GetText() ?? string.Empty;
+            }
+            catch
+            {
+                return string.Empty;
+            }
         }
 
         private async void Connection_RequestReceived(AppServiceConnection sender, AppServiceRequestReceivedEventArgs args)

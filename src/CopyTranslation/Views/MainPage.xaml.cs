@@ -1,9 +1,11 @@
 ﻿using CopyTranslation.ViewModels;
+using ReactiveUI;
 using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.AppService;
 using Windows.Foundation.Collections;
 using Windows.Foundation.Metadata;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
@@ -14,6 +16,10 @@ namespace CopyTranslation.Views
         public MainPage()
         {
             InitializeComponent();
+
+            StatusButton.Events()
+                .Tapped
+                .InvokeCommand(ViewModel.StatusTappedCommand);
         }
 
         public MainPageViewModel ViewModel { get; } = new MainPageViewModel();

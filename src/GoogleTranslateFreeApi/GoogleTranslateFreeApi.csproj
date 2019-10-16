@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
+    <Use64Bitcompiler>true</Use64Bitcompiler>
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<Authors>Ilya Meyta</Authors>
 		<Company />

@@ -204,7 +204,8 @@ namespace GoogleTranslateFreeApi
 			string postData = $"sl={fromLanguage.ISO639}&" +
 												$"tl={toLanguage.ISO639}&" +
 												$"q={Uri.EscapeDataString(originalText)}&" +
-												"client=gtx&" +
+                                                $"tk={token}&" +
+                                                "client=gtx&" +
                                                 "dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&" +
 												"ie=UTF-8&" +
 												"oe=UTF-8&";
