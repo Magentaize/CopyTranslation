@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation.Collections;
@@ -23,6 +22,8 @@ namespace CopyTranslation.ViewModels
         public MainPageStatus Status { get; private set; }
 
         public ICommand StatusTappedCommand { get; }
+
+        public Action SubTranslate;
 
         public MainPageViewModel()
         {
@@ -53,13 +54,13 @@ namespace CopyTranslation.ViewModels
                 .ObserveOn(TaskPoolScheduler.Default)
                 .Throttle(TimeSpan.FromMilliseconds(50))
                 .TakeUntil(status.Where(x => x == MainPageStatus.Pause))
-                .RepeatWhen(_ => 
+                .RepeatWhen(_ =>
                     status.Where(_ => Status == MainPageStatus.Pause)
                         .Where(x => x == MainPageStatus.Normal)
                         .Do(_ => lastError = false)
                 )
                 .Do(_ => status.OnNext(MainPageStatus.Busy))
-                .SelectMany(_ => 
+                .SelectMany(_ =>
                     Observable.FromAsync(async () =>
                     {
                         var req = new ValueSet();
@@ -69,18 +70,8 @@ namespace CopyTranslation.ViewModels
                     })
                     .Catch(Observable.Return(string.Empty))
                 )
-                .Where(x =>
-                {
-                    if (x != string.Empty && char.IsLetter(x[0]))
-                        return true;
-                    else
-                    {
-                        status.OnNext(MainPageStatus.Normal);
-                        return false;
-                    }
-                })
-                //.DistinctUntilChanged()
-                .DistinctUntilChanged(_ => status.OnNext(MainPageStatus.Normal))
+                .WhereAndElse(x => x != string.Empty && char.IsLetter(x[0]), _ => status.OnNext(MainPageStatus.Normal))
+                .DistinctUntilChangedAndElse(_ => status.OnNext(MainPageStatus.Normal))
                 .Select(x => x.Replace("\r\n", " "))
                 .Select(x => Observable.FromAsync(async () => await translator.TranslateLiteAsync(x, en, zh)))
                 .Switch()
@@ -88,8 +79,7 @@ namespace CopyTranslation.ViewModels
                 .Do(_ => status.OnNext(MainPageStatus.Normal))
                 ;
 
-            Action resumeException = null;
-            resumeException = () =>
+            SubTranslate = () =>
             {
                 translate.ObserveOnDispatcher()
                     .ToPropertyEx(this, x => x.Translated)
@@ -100,10 +90,9 @@ namespace CopyTranslation.ViewModels
                         Debug.WriteLine($"Exception: {e.Message}");
                         lastError = true;
 
-                        resumeException();
+                        SubTranslate();
                     });
             };
-            resumeException();
         }
     }
 

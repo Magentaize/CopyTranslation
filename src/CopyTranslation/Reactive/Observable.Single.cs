@@ -1,14 +1,25 @@
-﻿namespace System.Reactive.Linq
+﻿using JetBrains.Annotations;
+
+namespace System.Reactive.Linq
 {
     public static class ObservableExtension
     {
-        public static IObservable<string> DistinctUntilChanged(this IObservable<string> source, Action<string> action) 
+        public static IObservable<T> WhereAndElse<T>([NotNull]this IObservable<T> source, [NotNull]Func<T, bool> predicate, Action<T> action)
         {
-            if (source == null)
+            return Observable.Create<T>(o =>
             {
-                throw new ArgumentNullException(nameof(source));
-            }
+                return source.Subscribe(x =>
+                {
+                    if (predicate(x))
+                        o.OnNext(x);
+                    else
+                        action?.Invoke(x);
+                });
+            });
+        }
 
+        public static IObservable<string> DistinctUntilChangedAndElse([NotNull]this IObservable<string> source, Action<string> action) 
+        {
             return Observable.Create<string>(o =>
             {
                 string last = string.Empty;
@@ -22,7 +33,7 @@
                     }
                     else
                     {
-                        action(x);
+                        action?.Invoke(x);
                     }
                 });
             });

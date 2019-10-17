@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<assembly name="CopyTranslation">
+  <member name="M:System.Reactive.Linq.ObservableExtension.DistinctUntilChangedAndElse(System.IObservable{System.String},System.Action{System.String})">
+    <parameter name="source">
+      <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+    </parameter>
+  </member>
+  <member name="M:System.Reactive.Linq.ObservableExtension.WhereAndElse``1(System.IObservable{``0},System.Func{``0,System.Boolean},System.Action{``0})">
+    <parameter name="source">
+      <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+    </parameter>
+    <parameter name="predicate">
+      <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+    </parameter>
+  </member>
+</assembly>

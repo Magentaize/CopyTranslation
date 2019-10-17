@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:converters="using:CopyTranslation.Views.Converters"
+    xmlns:extensions="using:Microsoft.Toolkit.Uwp.UI.Extensions"
     mc:Ignorable="d"
     MinWidth="1"
     Background="{ThemeResource SystemControlAltMediumLowAcrylicWindowMediumBrush}">
@@ -177,8 +178,9 @@
       <Grid HorizontalAlignment="Right"
             VerticalAlignment="Bottom">
         <Ellipse x:Name="StatusButton"
-                 Height="20"
-                 Width="20"
+                 extensions:Mouse.Cursor="Hand"
+                 Height="24"
+                 Width="{Binding Height, RelativeSource={RelativeSource Mode=Self}}"
                  Margin="0 0 8 8"
                  Fill="{x:Bind ViewModel.Status, Mode=OneWay, Converter={StaticResource MainPageStatusToColorConverter}}" />
       </Grid>
