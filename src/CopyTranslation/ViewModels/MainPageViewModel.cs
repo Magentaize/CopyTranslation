@@ -4,16 +4,22 @@ using ReactiveUI.Fody.Helpers;
 using System;
 using System.Diagnostics;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Windows.Input;
+using Windows.ApplicationModel;
+using Windows.ApplicationModel.AppService;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Foundation.Metadata;
+using Windows.UI.Popups;
 using Windows.UI.Xaml.Input;
 
 namespace CopyTranslation.ViewModels
 {
-    public sealed class MainPageViewModel : ReactiveObject
+    public sealed class MainPageViewModel : ReactiveObject, IActivatableViewModel
     {
         [ObservableAsProperty]
         public string Translated { get; private set; }
@@ -22,6 +28,8 @@ namespace CopyTranslation.ViewModels
         public MainPageStatus Status { get; private set; }
 
         public ICommand StatusTappedCommand { get; }
+
+        public ViewModelActivator Activator { get; } = new ViewModelActivator();
 
         public Action SubTranslate;
 
@@ -93,6 +101,37 @@ namespace CopyTranslation.ViewModels
                         SubTranslate();
                     });
             };
+
+            this.WhenActivated(async (CompositeDisposable d) =>
+            {
+                if (ApiInformation.IsApiContractPresent("Windows.ApplicationModel.FullTrustAppContract", 1, 0))
+                {
+                    Observable.FromEventPattern<AppServiceTriggerDetails>(
+                        h => App.AppServiceConnected += h,
+                        h => App.AppServiceConnected -= h)
+                    .Subscribe(x =>
+                    {
+                        SubTranslate();
+                    });
+
+                    Observable.FromEventPattern(
+                        h => App.AppServiceDisconnected += h,
+                        h => App.AppServiceDisconnected -= h)
+                    .ObserveOnDispatcher()
+                    .Subscribe(async x =>
+                    {
+                        var dlg = new MessageDialog("AppService has disconnected.");
+                        await dlg.ShowAsync();
+                    });
+
+                    await LaunchFullTrustAsync();
+                }
+            });
+        }
+
+        private IAsyncAction LaunchFullTrustAsync()
+        {
+            return FullTrustProcessLauncher.LaunchFullTrustProcessForCurrentAppAsync();
         }
     }
 

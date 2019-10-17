@@ -1,20 +1,16 @@
 ﻿using CopyTranslation.ViewModels;
 using ReactiveUI;
-using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.AppService;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
-using Windows.Foundation.Metadata;
-using vm = Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Navigation;
-using System.Threading.Tasks;
+using vm = Windows.UI.ViewManagement;
 
 namespace CopyTranslation.Views
 {
-    public sealed partial class MainPage : Page
+    public sealed partial class MainPage : Page, IViewFor<MainPageViewModel>
     {
         public MainPage()
         {
@@ -25,36 +21,13 @@ namespace CopyTranslation.Views
             StatusButton.Events()
                 .Tapped
                 .InvokeCommand(ViewModel.StatusTappedCommand);
+
+            this.WhenActivated(d => { });
         }
 
         public MainPageViewModel ViewModel { get; } = new MainPageViewModel();
-
-        protected async override void OnNavigatedTo(NavigationEventArgs e)
-        {
-            base.OnNavigatedTo(e);
-
-            if (ApiInformation.IsApiContractPresent("Windows.ApplicationModel.FullTrustAppContract", 1, 0))
-            {
-                App.AppServiceConnected += App_AppServiceConnected;
-                App.AppServiceDisconnected += App_AppServiceDisconnected;
-                await LaunchFullTrustAsync();
-            }
-        }
-
-        private void App_AppServiceConnected(object sender, AppServiceTriggerDetails e)
-        {
-            ViewModel.SubTranslate();
-        }
-
-        private void App_AppServiceDisconnected(object sender, EventArgs e)
-        {
-
-        }
-
-        private IAsyncAction LaunchFullTrustAsync()
-        {
-            return FullTrustProcessLauncher.LaunchFullTrustProcessForCurrentAppAsync();
-        }
+        MainPageViewModel IViewFor<MainPageViewModel>.ViewModel { get => ViewModel; set => throw new System.NotImplementedException(); }
+        object IViewFor.ViewModel { get => ViewModel; set => throw new System.NotImplementedException(); }
 
         private void ResizeWindowForVeryFirstLaunch()
         {
