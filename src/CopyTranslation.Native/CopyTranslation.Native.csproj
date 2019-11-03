@@ -5,11 +5,14 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <ApplicationIcon />
     <StartupObject />
+    <PublishTrimmed>true</PublishTrimmed>
+    <PublishSingleFile>true</PublishSingleFile>
+    <PublishReadyToRun>true</PublishReadyToRun>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.18362.2005" />
-    <PackageReference Include="Microsoft.Windows.WinMD" Version="1.0.191006.1" />
+    <PackageReference Include="Microsoft.Windows.WinMD" Version="1.0.191022.1" />
     <PackageReference Include="TextCopy" Version="1.7.1" />
   </ItemGroup>
 

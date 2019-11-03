@@ -1,10 +1,8 @@
-﻿using JetBrains.Annotations;
-
-namespace System.Reactive.Linq
+﻿namespace System.Reactive.Linq
 {
     public static class ObservableExtension
     {
-        public static IObservable<T> WhereAndElse<T>([NotNull]this IObservable<T> source, [NotNull]Func<T, bool> predicate, Action<T> action)
+        public static IObservable<T> WhereAndElse<T>(this IObservable<T> source, Func<T, bool> predicate, Action<T> action)
         {
             return Observable.Create<T>(o =>
             {
@@ -18,7 +16,7 @@ namespace System.Reactive.Linq
             });
         }
 
-        public static IObservable<string> DistinctUntilChangedAndElse([NotNull]this IObservable<string> source, Action<string> action) 
+        public static IObservable<string> DistinctUntilChangedAndElse(this IObservable<string> source, Action<string> action) 
         {
             return Observable.Create<string>(o =>
             {
