@@ -10,7 +10,7 @@
     <PublishSingleFile>true</PublishSingleFile>
     <PublishReadyToRun>true</PublishReadyToRun>
     <Platforms>AnyCPU;x64</Platforms>
-    <PublishTrimmed>true</PublishTrimmed>
+    <TrimUnusedDependencies>false</TrimUnusedDependencies>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

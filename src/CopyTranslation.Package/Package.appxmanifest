@@ -10,10 +10,10 @@
   <Identity
     Name="c003980c-f025-4905-9cc3-070a5241889f"
     Publisher="CN=Magentaize"
-    Version="1.0.1.1" />
+    Version="1.0.2.1" />
 
   <Properties>
-    <DisplayName>CopyTranslation.Package</DisplayName>
+    <DisplayName>CopyTranslation</DisplayName>
     <PublisherDisplayName>Magentaize</PublisherDisplayName>
     <Logo>Images\StoreLogo.png</Logo>
   </Properties>
@@ -32,13 +32,18 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="CopyTranslation.Package"
-        Description="CopyTranslation.Package"
+        DisplayName="CopyTranslation"
+        Description="CopyTranslation"
         BackgroundColor="transparent"
         Square150x150Logo="Images\Square150x150Logo.png"
         Square44x44Logo="Images\Square44x44Logo.png">
         <uap:DefaultTile Wide310x150Logo="Images\Wide310x150Logo.png" />
         <uap:SplashScreen Image="Images\SplashScreen.png" />
+        <uap:InitialRotationPreference>
+          <uap:Rotation Preference="landscape"/>
+          <uap:Rotation Preference="portrait"/>
+          <uap:Rotation Preference="landscapeFlipped"/>
+          <uap:Rotation Preference="portraitFlipped"/></uap:InitialRotationPreference>
       </uap:VisualElements>
       <Extensions>
         <uap:Extension Category="windows.appService">
