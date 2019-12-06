@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
-using System.Text.Json;
+using Newtonsoft.Json.Linq;
 
 namespace GoogleTranslateFreeApi.TranslationData
 {
-    [DataContract]
+	[DataContract]
 	public sealed class Definitions : TranslationInfoParser
 	{
 		[DataContract]
@@ -15,13 +15,13 @@ namespace GoogleTranslateFreeApi.TranslationData
 		{
 			[DataMember] public string Explanation { get; private set; }
 			[DataMember] public string Example { get; private set; }
-			
+
 			internal Definition(string explantion, string example)
 			{
 				Explanation = explantion;
 				Example = example;
 			}
-			
+
 			public override string ToString() => $"Explantion: {Explanation} Example: {Example}";
 		}
 
@@ -43,8 +43,8 @@ namespace GoogleTranslateFreeApi.TranslationData
 
 		public override string ToString()
 		{
-			string info = string.Empty;
-			
+			string info = String.Empty;
+
 			info += FormatOutput(Noun, nameof(Noun));
 			info += FormatOutput(Verb, nameof(Verb));
 			info += FormatOutput(Pronoun, nameof(Pronoun));
@@ -67,7 +67,7 @@ namespace GoogleTranslateFreeApi.TranslationData
 		{
 			if (formatData == null || !formatData.Any())
 				return String.Empty;
-			
+
 			int i = 1;
 			string tmp = '\n' + partOfSpeechName + ':';
 			return formatData.Aggregate(
@@ -75,21 +75,21 @@ namespace GoogleTranslateFreeApi.TranslationData
 		}
 
 
-		internal override bool TryParseMemberAndAdd(string memberName, JsonElement parseInformation)
+		internal override bool TryParseMemberAndAdd(string memberName, JToken parseInformation)
 		{
 			PropertyInfo property = this.GetType().GetRuntimeProperty(memberName.ToCamelCase());
 			if (property == null)
 				return false;
-			
+
 			var definitions = (
-				from definitionUnformatted in parseInformation.EnumerateArray()
-				let explantion = definitionUnformatted[0].GetString() 
-				let example = definitionUnformatted[definitionUnformatted.GetArrayLength() - 1].GetString()
+				from definitionUnformatted in parseInformation
+				let explantion = (string)definitionUnformatted[0]
+				let example = (string)definitionUnformatted[definitionUnformatted.Count() - 1]
 				select new Definition(explantion, example)
 				).ToArray();
 
 			property.SetMethod.Invoke(this, new object[] { definitions });
-			
+
 			return true;
 		}
 

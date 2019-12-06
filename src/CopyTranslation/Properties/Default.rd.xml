@@ -24,7 +24,5 @@
     <Assembly Name="*Application*" Dynamic="Required All" />
     <Namespace Name="GoogleTranslateFreeApi.TranslationData" Serialize="Required PublicAndInternal" />
     <Type Name="GoogleTranslateFreeApi.Language" Serialize="Required PublicAndInternal" />
-    <Type Name="System.Text.Json.JsonElement" Serialize="Required PublicAndInternal" />
-    <Namespace Name="System.Text.Json.Serialization" Serialize="Required All" />
   </Application>
 </Directives>

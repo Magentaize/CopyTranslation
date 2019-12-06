@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
-using System.Text.Json;
+using Newtonsoft.Json.Linq;
 
 namespace GoogleTranslateFreeApi.TranslationData
 {
-    [DataContract]
-	public sealed class Synonyms: TranslationInfoParser
+	[DataContract]
+	public sealed class Synonyms : TranslationInfoParser
 	{
 		[DataMember] public string[] Noun { get; internal set; }
 		[DataMember] public string[] Exclamation { get; internal set; }
@@ -23,7 +23,7 @@ namespace GoogleTranslateFreeApi.TranslationData
 
 		public override string ToString()
 		{
-			string info = string.Empty;
+			string info = String.Empty;
 			info += FormatOutput(Noun, nameof(Noun));
 			info += FormatOutput(Verb, nameof(Verb));
 			info += FormatOutput(Pronoun, nameof(Pronoun));
@@ -46,19 +46,18 @@ namespace GoogleTranslateFreeApi.TranslationData
 				: $"{partOfSpeechName}: {string.Join(", ", partOfSpeechData)} \n";
 		}
 
-		internal override bool TryParseMemberAndAdd(string memberName, JsonElement parseInformation)
+		internal override bool TryParseMemberAndAdd(string memberName, JToken parseInformation)
 		{
-			var property = GetType().GetRuntimeProperty(memberName.ToCamelCase());
+			PropertyInfo property = GetType().GetRuntimeProperty(memberName.ToCamelCase());
 			if (property == null)
 				return false;
-			
-			var synonyms = new List<string>();
-            foreach (var synonymsSet in parseInformation.EnumerateArray())
-                synonyms.AddRange(Array.ConvertAll(synonymsSet[0].EnumerateArray().ToArray(),
-                    x => x.GetString()));
 
-            property.SetMethod.Invoke(this, new object[] { synonyms.ToArray() });
-			
+			List<string> synonyms = new List<string>();
+			foreach (var synonymsSet in parseInformation)
+				synonyms.AddRange(synonymsSet[0].ToObject<string[]>());
+
+			property.SetMethod.Invoke(this, new object[] { synonyms.ToArray() });
+
 			return true;
 		}
 

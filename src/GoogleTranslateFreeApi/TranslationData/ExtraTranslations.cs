@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices.ComTypes;
 using System.Runtime.Serialization;
-using System.Text.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Schema;
 
 namespace GoogleTranslateFreeApi.TranslationData
 {
-    [DataContract]
+	[DataContract]
 	public sealed class ExtraTranslations : TranslationInfoParser
 	{
 		[DataContract]
@@ -24,10 +27,10 @@ namespace GoogleTranslateFreeApi.TranslationData
 
 			public override string ToString() => $"{Phrase}: {String.Join(", ", PhraseTranslations)}";
 		}
-		
+
 		[DataMember] public ExtraTranslation[] Noun { get; internal set; }
 		[DataMember] public ExtraTranslation[] Verb { get; internal set; }
-		[DataMember] public ExtraTranslation[] Pronoun { get;  internal set; }
+		[DataMember] public ExtraTranslation[] Pronoun { get; internal set; }
 		[DataMember] public ExtraTranslation[] Adverb { get; internal set; }
 		[DataMember] public ExtraTranslation[] AuxiliaryVerb { get; internal set; }
 		[DataMember] public ExtraTranslation[] Adjective { get; internal set; }
@@ -39,25 +42,25 @@ namespace GoogleTranslateFreeApi.TranslationData
 		[DataMember] public ExtraTranslation[] Abbreviation { get; internal set; }
 		[DataMember] public ExtraTranslation[] Particle { get; internal set; }
 		[DataMember] public ExtraTranslation[] Phrase { get; internal set; }
-		
+
 		public ExtraTranslations() { }
 
-		
+
 		private string FormatOutput(IEnumerable<ExtraTranslation> formatData, string partOfSpeechName)
 		{
-			if(formatData == null)
+			if (formatData == null)
 				return String.Empty;
-			
+
 			string result = partOfSpeechName + ":\n";
 
-			return formatData.Aggregate(result, (current, data) 
+			return formatData.Aggregate(result, (current, data)
 				=> current + $"{data.Phrase}: {String.Join(", ", data.PhraseTranslations)}\n");
 		}
 
 		public override string ToString()
 		{
 			string result = String.Empty;
-			
+
 			result += FormatOutput(Noun, nameof(Noun));
 			result += FormatOutput(Verb, nameof(Verb));
 			result += FormatOutput(Pronoun, nameof(Pronoun));
@@ -77,21 +80,20 @@ namespace GoogleTranslateFreeApi.TranslationData
 		}
 
 
-		internal override bool TryParseMemberAndAdd(string memberName, JsonElement parseInformation)
+		internal override bool TryParseMemberAndAdd(string memberName, JToken parseInformation)
 		{
 			PropertyInfo property = this.GetType().GetRuntimeProperty(memberName.ToCamelCase());
 			if (property == null)
 				return false;
-			
-			var extraTranslations = new ExtraTranslation[parseInformation.GetArrayLength()];
 
-            for (int i = 0; i < parseInformation.GetArrayLength(); i++)
-                extraTranslations[i] = new ExtraTranslation(
-                    parseInformation[i][0].GetString(), 
-                    Array.ConvertAll(parseInformation[i][1].EnumerateArray().ToArray(), x => x.GetString()));
+			var extraTranslations = new ExtraTranslation[parseInformation.Count()];
 
-            property.SetMethod.Invoke(this,
-				new object[] { extraTranslations } );
+			for (int i = 0; i < parseInformation.Count(); i++)
+				extraTranslations[i] = new ExtraTranslation(
+					(string)parseInformation[i][0], parseInformation[i][1].ToObject<string[]>());
+
+			property.SetMethod.Invoke(this,
+				new object[] { extraTranslations });
 
 			return true;
 		}

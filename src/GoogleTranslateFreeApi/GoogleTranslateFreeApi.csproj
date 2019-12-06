@@ -17,6 +17,8 @@
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 	  <DocumentationFile>GoogleTranslateFreeApi.xml</DocumentationFile>
+	  <DebugType>none</DebugType>
+	  <DebugSymbols>false</DebugSymbols>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 	  <DocumentationFile>GoogleTranslateFreeApi\bin\Release\GoogleTranslateFreeApi.xml</DocumentationFile>
@@ -36,7 +38,7 @@
 	  </None>
 	</ItemGroup>
 	<ItemGroup>
-	  <PackageReference Include="System.Text.Json" Version="4.7.0" />
+	  <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
 	</ItemGroup>
 	<ItemGroup>
 	  <EmbeddedResource Include="Languages.json">

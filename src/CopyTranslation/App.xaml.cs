@@ -36,7 +36,7 @@ namespace CopyTranslation
 
         private async void App_UnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e)
         {
-            Debugger.Break();
+            Debugger.Launch();
         }
 
         protected override void OnBackgroundActivated(BackgroundActivatedEventArgs args)
