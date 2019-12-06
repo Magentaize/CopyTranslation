@@ -253,7 +253,8 @@ namespace GoogleTranslateFreeApi
 			translationResult.OriginalTextTranscription = originalTextTranscription;
 			translationResult.TranslatedTextTranscription = translatedTextTranscription;
 
-			translationResult.Corrections = GetTranslationCorrections(tmp);
+			// out of range exception due to changed api
+			//translationResult.Corrections = GetTranslationCorrections(tmp);
 
 			translationResult.SourceLanguage = sourceLanguage;
 			translationResult.TargetLanguage = targetLanguage;
