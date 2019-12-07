@@ -100,8 +100,6 @@ namespace CopyTranslation
                 }
                 // Ensure the current window is active
                 Window.Current.Activate();
-
-                ExtendTitleBar();
             }
         }
 
@@ -120,14 +118,6 @@ namespace CopyTranslation
         {
             var deferral = e.SuspendingOperation.GetDeferral();
             deferral.Complete();
-        }
-
-        private void ExtendTitleBar()
-        {
-            CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = true;
-            ApplicationViewTitleBar titleBar = ApplicationView.GetForCurrentView().TitleBar;
-            titleBar.ButtonBackgroundColor = Colors.Transparent;
-            titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
         }
     }
 }

@@ -15,14 +15,26 @@ using ke = Windows.UI.Core.KeyEventArgs;
 using pe = Windows.UI.Core.PointerEventArgs;
 using System.Reactive.Concurrency;
 using System.Reactive;
+using System;
+using Windows.ApplicationModel.Core;
+using Windows.UI;
 
 namespace CopyTranslation.Views
 {
     public sealed partial class MainPage : Page, IViewFor<MainPageViewModel>
     {
+        public Visibility CompactOverlayVisibility { get; }
+
         public MainPage()
         {
+            if (vm.ApplicationView.GetForCurrentView().IsViewModeSupported(vm.ApplicationViewMode.CompactOverlay))
+            {
+                CompactOverlayVisibility = Visibility.Visible;
+            }
+
             InitializeComponent();
+
+            ExtendTitleBar();
 
             VeryFirstLaunch();
 
@@ -136,6 +148,46 @@ namespace CopyTranslation.Views
             {
                 vm.ApplicationView.PreferredLaunchWindowingMode = vm.ApplicationViewWindowingMode.Auto;
             }
+        }
+
+        bool compactOverlayEnabled;
+        private async void Button_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            if (compactOverlayEnabled)
+            {
+                var modeSwitched = await vm.ApplicationView.GetForCurrentView().TryEnterViewModeAsync(vm.ApplicationViewMode.Default);
+                if (modeSwitched) compactOverlayEnabled = false;
+            }
+            else
+            {
+                var modeSwitched = await vm.ApplicationView.GetForCurrentView().TryEnterViewModeAsync(vm.ApplicationViewMode.CompactOverlay);
+                if (modeSwitched) compactOverlayEnabled = true;
+            }
+        }
+
+        private void ExtendTitleBar()
+        {
+            var coreTitleBar = CoreApplication.GetCurrentView().TitleBar;
+            coreTitleBar.ExtendViewIntoTitleBar = true;
+            UpdateTitleBarLayout(coreTitleBar);
+            Window.Current.SetTitleBar(AppTitleBar);
+
+            coreTitleBar.LayoutMetricsChanged += CoreTitleBar_LayoutMetricsChanged;
+
+            var titleBar = vm.ApplicationView.GetForCurrentView().TitleBar;
+            titleBar.ButtonBackgroundColor = Colors.Transparent;
+            titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
+        }
+        private void CoreTitleBar_LayoutMetricsChanged(CoreApplicationViewTitleBar sender, object args)
+        {
+            UpdateTitleBarLayout(sender);
+        }
+
+        private void UpdateTitleBarLayout(CoreApplicationViewTitleBar coreTitleBar)
+        {
+            LeftPaddingColumn.Width = new GridLength(coreTitleBar.SystemOverlayLeftInset);
+            RightPaddingColumn.Width = new GridLength(coreTitleBar.SystemOverlayRightInset);
+            AppTitleBar.Height = coreTitleBar.Height;
         }
     }
 }

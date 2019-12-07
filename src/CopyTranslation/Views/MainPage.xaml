@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:converters="using:CopyTranslation.Views.Converters"
     xmlns:extensions="using:Microsoft.Toolkit.Uwp.UI.Extensions"
-    mc:Ignorable="d"
+  mc:Ignorable="d"
     MinWidth="1"
     Background="{ThemeResource SystemControlAltMediumLowAcrylicWindowMediumBrush}">
   <Page.Resources>
@@ -152,11 +152,26 @@
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
 
-    <Border Height="28" 
-            BorderThickness="0" 
-            BorderBrush="{x:Null}">
-      <TextBlock Text="CopyTranslation" FontSize="12" VerticalAlignment="Center" Margin="4 0 0 0"/>
-    </Border>
+    <Grid Height="28" Grid.Row="0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition x:Name="LeftPaddingColumn" Width="0"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition x:Name="RightPaddingColumn" Width="2"/>
+      </Grid.ColumnDefinitions>
+
+      <Grid x:Name="AppTitleBar" Grid.Column="1" Background="Transparent">
+        <TextBlock Text="CopyTranslation" FontSize="12" VerticalAlignment="Center" Margin="4 0 0 0"/>
+      </Grid>
+
+      <Grid Grid.Column="2" HorizontalAlignment="Right">
+        <Button
+          Visibility="{x:Bind CompactOverlayVisibility}"
+          Tapped="Button_Tapped">
+          <FontIcon Glyph="&#xE17C;"/>
+        </Button>
+      </Grid>
+    </Grid>
 
     <Grid x:Name="TranslatedTextPanel" Grid.Row="1">
       <ScrollViewer x:Name="TranslatedTextViewer"
