@@ -3,6 +3,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Diagnostics;
+using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -14,6 +15,7 @@ using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Foundation.Metadata;
+using Windows.UI.Input;
 using Windows.UI.Popups;
 using Windows.UI.Xaml.Input;
 
@@ -27,17 +29,25 @@ namespace CopyTranslation.ViewModels
         [ObservableAsProperty]
         public MainPageStatus Status { get; private set; }
 
+        [ObservableAsProperty]
+        public double TranslatedTextFontSize { get; private set; }
+
         public ICommand StatusTappedCommand { get; }
 
         public ViewModelActivator Activator { get; } = new ViewModelActivator();
 
-        public Action SubTranslate;
+        public ISubject<Unit> TranslatedTextFontSizePitchStart { get; } = new Subject<Unit>();
+        public ISubject<Unit> TranslatedTextFontSizePitchCompleted { get; } = new Subject<Unit>();
+        public ISubject<double> TranslatedTextFontSizePitch { get; } = new Subject<double>();
+        public ISubject<PointerPointProperties> TranslatedTextFontSizeWheel { get; } = new Subject<PointerPointProperties>();
 
         public MainPageViewModel()
         {
             var status = new Subject<MainPageStatus>();
             status.ObserveOnDispatcher()
                 .ToPropertyEx(this, x => x.Status);
+
+            BuildTranslatedTextFontSizeProcessor();
 
             StatusTappedCommand = ReactiveCommand.Create<TappedRoutedEventArgs>(_ =>
             {
@@ -87,7 +97,9 @@ namespace CopyTranslation.ViewModels
                 .Do(_ => status.OnNext(MainPageStatus.Normal))
                 ;
 
-            SubTranslate = () =>
+            // workaround for use unassigned variable 
+            Action subTranslate = () => throw new NotImplementedException();
+            subTranslate = () =>
             {
                 translate.ObserveOnDispatcher()
                     .ToPropertyEx(this, x => x.Translated)
@@ -98,7 +110,7 @@ namespace CopyTranslation.ViewModels
                         Debug.WriteLine($"Exception: {e.Message}");
                         lastError = true;
 
-                        SubTranslate();
+                        subTranslate();
                     });
             };
 
@@ -111,7 +123,7 @@ namespace CopyTranslation.ViewModels
                         h => App.AppServiceConnected -= h)
                     .Subscribe(x =>
                     {
-                        SubTranslate();
+                        subTranslate();
                     });
 
                     Observable.FromEventPattern(
@@ -127,6 +139,62 @@ namespace CopyTranslation.ViewModels
                     await LaunchFullTrustAsync();
                 }
             });
+        }
+
+        private void BuildTranslatedTextFontSizeProcessor()
+        {
+            var localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
+
+            // TranslatedText FontSize
+            const string FONTSIZE_STR = nameof(TranslatedTextFontSize);
+            double defaultFontSize;
+
+            if (localSettings.Values[FONTSIZE_STR] == null)
+            {
+                localSettings.Values[FONTSIZE_STR] = 36d;
+                defaultFontSize = 36d;
+            }
+            else
+            {
+                defaultFontSize = (double)localSettings.Values[FONTSIZE_STR];
+            }
+
+            const double FONTSIZE_DELTA = 2d;
+
+            var wheel = TranslatedTextFontSizeWheel
+                .Select(x => x.MouseWheelDelta)
+                .ObserveOn(TaskPoolScheduler.Default)
+                .Select(Math.Sign);
+
+            var datum = 1d;
+            var pitch = TranslatedTextFontSizePitch
+                .SkipUntil(TranslatedTextFontSizePitchStart.Do(_ => datum = 1d))
+                .TakeUntil(TranslatedTextFontSizePitchCompleted)
+                .Repeat()
+                .ObserveOn(TaskPoolScheduler.Default)
+                .Sample(TimeSpan.FromSeconds(0.1))
+                .Select(x =>
+                {
+                    var sub = x - datum;
+                    if (Math.Abs(sub) >= 0.005)
+                    {
+                        datum = x;
+                        return Math.Sign(sub);
+                    }
+                    return 0;
+                })
+                .Where(x => x != 0);
+
+            wheel.Merge(pitch)
+                .Select(x =>
+                {
+                    if (x == 1) return TranslatedTextFontSize + FONTSIZE_DELTA;
+                    else if (x == -1) return TranslatedTextFontSize - FONTSIZE_DELTA;
+                    else return TranslatedTextFontSize;
+                })
+                .Do(x => localSettings.Values[FONTSIZE_STR] = x)
+                .ObserveOnDispatcher()
+                .ToPropertyEx(this, x => x.TranslatedTextFontSize, defaultFontSize);
         }
 
         private IAsyncAction LaunchFullTrustAsync()
